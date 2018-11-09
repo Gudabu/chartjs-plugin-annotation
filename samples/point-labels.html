@@ -142,14 +142,6 @@
 	                        backgroundColor: "red",
 	                        content: "Test Label",
 	                        enabled: true
-	                    },
-	                    OnMouseleave: function(e) {
-	                        // The annotation is is bound to the `this` variable
-	                        console.log('enter', e.type, this);
-											},
-											OnMouseleave: function(e) {
-	                        // The annotation is is bound to the `this` variable
-	                        console.log('leave', e.type, this);
 	                    }
 	                }, {
 	                    id: 'vline',
@@ -170,8 +162,6 @@
 	                    },
 	                    onMouseenter: function(e) {
 	                        // The annotation is is bound to the `this` variable
-													console.log('enter', e, this);
-
 													var labelEl = document.createElement('div');
 													labelEl.id = 'sss';
 													labelEl.innerHTML = "<b>"+this._view.labelContent+"</b>";
@@ -185,7 +175,6 @@
 											},
 											onMouseleave: function(e) {
 	                        // The annotation is is bound to the `this` variable
-													console.log('leave', e.type, this);
 													var labelEl = document.getElementById('sss');
 													labelEl.remove();
 	                    }
@@ -197,7 +186,6 @@
 		window.onload = function() {
 			var ctx = document.getElementById("canvas").getContext("2d");
 			window.myLine = new Chart(ctx, config);
-
 		};
 
 		document.getElementById('randomizeData').addEventListener('click', function() {

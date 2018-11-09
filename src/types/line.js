@@ -146,21 +146,33 @@ module.exports = function(Chart) {
 			model.labelFontColor = options.label.fontColor;
 			model.labelXPadding = options.label.xPadding;
 			model.labelYPadding = options.label.yPadding;
-			model.labelCornerRadius = options.label.cornerRadius;
+			model.labelCornerRadius = options.label.showAsPoint ? options.label.point.cornerRadius : options.label.cornerRadius;
 			model.labelPosition = options.label.position;
 			model.labelXAdjust = options.label.xAdjust;
 			model.labelYAdjust = options.label.yAdjust;
 			model.labelEnabled = options.label.enabled;
 			model.labelContent = options.label.content;
+			model.labelShowAsPoint = options.label.showAsPoint;
+			model.labelPoint = options.label.point;
 
 			ctx.font = chartHelpers.fontString(model.labelFontSize, model.labelFontStyle, model.labelFontFamily);
-			var textWidth = ctx.measureText(model.labelContent).width;
-			var textHeight = ctx.measureText('M').width;
-			var labelPosition = calculateLabelPosition(model, textWidth, textHeight, model.labelXPadding, model.labelYPadding);
-			model.labelX = labelPosition.x - model.labelXPadding;
-			model.labelY = labelPosition.y - model.labelYPadding;
-			model.labelWidth = textWidth + (2 * model.labelXPadding);
-			model.labelHeight = textHeight + (2 * model.labelYPadding);
+			
+			if (!model.labelShowAsPoint) {
+				var textWidth = ctx.measureText(model.labelContent).width;
+				var textHeight = ctx.measureText('M').width;
+
+				var labelPosition = calculateLabelPosition(model, textWidth, textHeight, model.labelXPadding, model.labelYPadding);
+				model.labelX = labelPosition.x - model.labelXPadding;
+				model.labelY = labelPosition.y - model.labelYPadding;
+				model.labelWidth = textWidth + (2 * model.labelXPadding);
+				model.labelHeight = textHeight + (2 * model.labelYPadding);
+			} else {
+				var labelPosition = calculateLabelPosition(model, model.labelPoint.size, model.labelPoint.size, 0, 0);
+				model.labelX = labelPosition.x;
+				model.labelY = labelPosition.y;
+				model.labelWidth = model.labelPoint.size;
+				model.labelHeight = model.labelPoint.size;
+			}
 
 			model.borderColor = options.borderColor;
 			model.borderWidth = options.borderWidth;
@@ -172,12 +184,13 @@ module.exports = function(Chart) {
 
 			return (
 				// On the line
+				!model.labelShowAsPoint &&
 				model.line &&
 				model.line.intersects(mouseX, mouseY, this.getHeight())
 			) || (
 				// On the label
 				model.labelEnabled &&
-				model.labelContent &&
+				(model.labelContent || model.labelShowAsPoint) &&
 				mouseX >= model.labelX &&
 				mouseX <= model.labelX + model.labelWidth &&
 				mouseY >= model.labelY &&
@@ -228,7 +241,7 @@ module.exports = function(Chart) {
 			ctx.lineTo(view.x2, view.y2);
 			ctx.stroke();
 
-			if (view.labelEnabled && view.labelContent) {
+			if (view.labelEnabled && (view.labelContent || view.labelShowAsPoint)) {
 				ctx.beginPath();
 				ctx.rect(view.clip.x1, view.clip.y1, view.clip.x2 - view.clip.x1, view.clip.y2 - view.clip.y1);
 				ctx.clip();
@@ -245,20 +258,22 @@ module.exports = function(Chart) {
 				);
 				ctx.fill();
 
-				// Draw the text
-				ctx.font = chartHelpers.fontString(
-					view.labelFontSize,
-					view.labelFontStyle,
-					view.labelFontFamily
-				);
-				ctx.fillStyle = view.labelFontColor;
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.fillText(
-					view.labelContent,
-					view.labelX + (view.labelWidth / 2),
-					view.labelY + (view.labelHeight / 2)
-				);
+				if (view.labelContent && !view.labelShowAsPoint) {
+					// Draw the text
+					ctx.font = chartHelpers.fontString(
+						view.labelFontSize,
+						view.labelFontStyle,
+						view.labelFontFamily
+					);
+					ctx.fillStyle = view.labelFontColor;
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'middle';
+					ctx.fillText(
+						view.labelContent,
+						view.labelX + (view.labelWidth / 2),
+						view.labelY + (view.labelHeight / 2)
+					);
+				}
 			}
 
 			ctx.restore();

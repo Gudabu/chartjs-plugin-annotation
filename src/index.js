@@ -31,7 +31,12 @@ Chart.Annotation.labelDefaults = {
 	xAdjust: 0,
 	yAdjust: 0,
 	enabled: false,
-	content: null
+	content: null,
+	showAsPoint: false,
+	point: {
+		size: 20,
+		cornerRadius: 50
+	}
 };
 
 Chart.Annotation.Element = require('./element.js')(Chart);
